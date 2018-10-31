@@ -189,6 +189,22 @@ func (a *Acme) Setup(ctx context.Context) error {
 		}
 
 		// Otherwise if we receive anything other than a 400, we will retry.
+
+		acmeErr, ok := err.(*acmeapi.Error)
+		// If this is not an ACME error, we will simply return it and retry later
+		if !ok {
+			return err
+		}
+
+		// If the status code is 400 (BadRequest), we will *not* retry this registration
+		// as it implies that something about the request (i.e. email address or private key)
+		// is invalid.
+		if acmeErr.StatusCode >= 400 && acmeErr.StatusCode < 500 {
+			glog.Infof("Skipping retrying account registration as a BadRequest response was returned from the ACME server: %v", acmeErr)
+			return nil
+		}
+
+		// Otherwise if we receive anything other than a 400, we will retry.
 		return err
 	}
 
