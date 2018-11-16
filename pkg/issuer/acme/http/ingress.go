@@ -258,7 +258,7 @@ func (s *Solver) cleanupIngresses(ctx context.Context, issuer v1alpha1.GenericIs
 	var ingRules []extv1beta1.IngressRule
 	for _, rule := range ing.Spec.Rules {
 		// always retain rules that are not for the same DNSName
-		if rule.Host != ch.Spec.DNSName {
+		if rule.Host != ch.Domain {
 			ingRules = append(ingRules, rule)
 			continue
 		}
