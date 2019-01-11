@@ -35,6 +35,7 @@ import (
 	"github.com/jetstack/cert-manager/pkg/issuer/acme/dns/cloudflare"
 	"github.com/jetstack/cert-manager/pkg/issuer/acme/dns/rfc2136"
 	"github.com/jetstack/cert-manager/pkg/issuer/acme/dns/route53"
+	"github.com/jetstack/cert-manager/pkg/issuer/acme/dns/gandiv5"
 	"github.com/jetstack/cert-manager/pkg/issuer/acme/dns/util"
 )
 
@@ -58,6 +59,7 @@ type dnsProviderConstructors struct {
 	azureDNS   func(clientID, clientSecret, subscriptionID, tenentID, resourceGroupName, hostedZoneName string, dns01Nameservers []string) (*azuredns.DNSProvider, error)
 	acmeDNS    func(host string, accountJson []byte, dns01Nameservers []string) (*acmedns.DNSProvider, error)
 	rfc2136    func(nameserver, tsigAlgorithm, tsigKeyName, tsigSecret string) (*rfc2136.DNSProvider, error)
+	gandiv5    func(apikey string, dns01Nameservers []string) (*gandiv5.DNSProvider, error)
 }
 
 // Solver is a solver for the acme dns01 challenge.
@@ -305,6 +307,17 @@ func (s *Solver) solverForIssuerProvider(issuer v1alpha1.GenericIssuer, provider
 		if err != nil {
 			return nil, fmt.Errorf("error instantiating rfc2136 challenge solver: %s", err.Error())
 		}
+	case providerConfig.Gandiv5 != nil:
+		apiKeySecret, err := s.secretLister.Secrets(resourceNamespace).Get(providerConfig.Gandiv5.APIKey.Name)
+		if err != nil {
+			return nil, fmt.Errorf("error getting gandiv5 service account: %s", err)
+		}
+
+		apiKey := string(apiKeySecret.Data[providerConfig.Gandiv5.APIKey.Key])
+		impl, err = s.dnsProviderConstructors.gandiv5(apiKey, s.DNS01Nameservers)
+		if err != nil {
+			return nil, fmt.Errorf("error instantiating gandiv5 challenge solver: %s", err)
+		}
 	default:
 		return nil, fmt.Errorf("no dns provider config specified for provider %q", providerName)
 	}
@@ -325,6 +338,7 @@ func NewSolver(ctx *controller.Context) *Solver {
 			azuredns.NewDNSProviderCredentials,
 			acmedns.NewDNSProviderHostBytes,
 			rfc2136.NewDNSProviderCredentials,
+			gandiv5.NewDNSProviderKey,
 		},
 	}
 }

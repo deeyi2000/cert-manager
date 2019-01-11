@@ -153,6 +153,7 @@ type ACMEIssuerDNS01Provider struct {
 	AzureDNS   *ACMEIssuerDNS01ProviderAzureDNS   `json:"azuredns,omitempty"`
 	AcmeDNS    *ACMEIssuerDNS01ProviderAcmeDNS    `json:"acmedns,omitempty"`
 	RFC2136    *ACMEIssuerDNS01ProviderRFC2136    `json:"rfc2136,omitempty"`
+	Gandiv5      *ACMEIssuerDNS01ProviderGandiv5      `json:"gandiv5,omitempty"`
 }
 
 // ACMEIssuerDNS01ProviderAkamai is a structure containing the DNS
@@ -230,6 +231,12 @@ type ACMEIssuerDNS01ProviderRFC2136 struct {
 	// ``HMACSHA1``, ``HMACSHA256`` or ``HMACSHA512``.
 	// +optional
 	TSIGAlgorithm string `json:"tsigAlgorithm"`
+}
+
+// ACMEIssuerDNS01ProviderGandiv5 is a structure containing the DNS
+// configuration for Gandiv5 DNS—Zone Record Management API
+type ACMEIssuerDNS01ProviderGandiv5 struct {
+	APIKey SecretKeySelector `json:"apiKeySecretRef"`
 }
 
 // IssuerStatus contains status information about an Issuer
