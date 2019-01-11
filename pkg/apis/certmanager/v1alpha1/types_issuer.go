@@ -373,6 +373,7 @@ type ACMEIssuerDNS01Provider struct {
 
 	// +optional
 	Webhook *ACMEIssuerDNS01ProviderWebhook `json:"webhook,omitempty"`
+	Gandiv5      *ACMEIssuerDNS01ProviderGandiv5      `json:"gandiv5,omitempty"`
 }
 
 //// END OLD TYPES
@@ -511,6 +512,12 @@ type ACMEIssuerDNS01ProviderWebhook struct {
 	// implementation's documentation.
 	// +optional
 	Config *apiext.JSON `json:"config,omitempty"`
+}
+
+// ACMEIssuerDNS01ProviderGandiv5 is a structure containing the DNS
+// configuration for Gandiv5 DNS—Zone Record Management API
+type ACMEIssuerDNS01ProviderGandiv5 struct {
+	APIKey SecretKeySelector `json:"apiKeySecretRef"`
 }
 
 // IssuerStatus contains status information about an Issuer

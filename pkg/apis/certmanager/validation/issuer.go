@@ -246,6 +246,14 @@ func ValidateACMEIssuerDNS01Config(iss *v1alpha1.ACMEIssuerDNS01Config, fldPath 
 				}
 			}
 		}
+		if p.Gandiv5 != nil {
+			if numProviders > 0 {
+				el = append(el, field.Forbidden(fldPath.Child("gandiv5"), "may not specify more than one provider type"))
+			} else {
+				numProviders++
+				el = append(el, ValidateSecretKeySelector(&p.Gandiv5.APIKey, fldPath.Child("gandiv5", "apiKeySecretRef"))...)
+			}
+		}
 		if p.Route53 != nil {
 			if numProviders > 0 {
 				el = append(el, field.Forbidden(fldPath.Child("route53"), "may not specify more than one provider type"))
